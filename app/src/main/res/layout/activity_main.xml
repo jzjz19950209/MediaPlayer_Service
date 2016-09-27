@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@drawable/v6"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.example.qf.mediaplayer_service.MainActivity">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_marginTop="20dp"
+        android:id="@+id/now"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textSize="24dp"
+        android:text="正在播放："
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="match_parent"
+        android:textSize="20dp"
+        android:layout_alignBottom="@+id/now"
+        android:singleLine="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollbars="horizontal"
+        android:ellipsize="marquee"
+        android:layout_marginRight="20dp"
+        android:id="@+id/name"
+        android:layout_toRightOf="@+id/now"
+        android:layout_height="wrap_content" />
+    <com.example.qf.mediaplayer_service.CustomImageView
+        android:layout_marginTop="20dp"
+        android:layout_width="250dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/name"
+        android:id="@+id/image"
+        app:shape="circle"
+        android:src="@drawable/yedegangqinqu"
+        android:layout_height="250dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="00:00"
+        android:textSize="20dp"
+        android:layout_above="@+id/seekBar"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:id="@+id/currentTime"
+        android:layout_height="wrap_content"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_above="@+id/seekBar"
+        android:text="00:00"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentRight="true"
+        android:textSize="20dp"
+        android:id="@+id/totalTime"
+        android:layout_height="wrap_content"
+        />
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_above="@+id/line"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/seekBar"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_marginLeft="20dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/line"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="40dp"
+            android:background="@drawable/btn_back_orange"
+            android:onClick="last"
+            android:layout_marginLeft="50dp"
+            android:layout_height="40dp" />
+        <Button
+            android:layout_width="50dp"
+            android:id="@+id/play_pause"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/player_toolbar_play_normal"
+            android:onClick="start_pause"
+            android:layout_height="50dp" />
+        <Button
+            android:layout_width="50dp"
+            android:onClick="stop"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/btn_record_stop"
+            android:layout_height="50dp" />
+        <Button
+            android:layout_width="40dp"
+            android:layout_marginLeft="20dp"
+            android:onClick="next"
+            android:background="@drawable/btn_back_orange1"
+            android:layout_height="40dp"/>
+        <Button
+            android:layout_width="35dp"
+            android:onClick="openList"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/player_toolbar_playinglist_pressed"
+            android:layout_marginLeft="20dp"
+            android:layout_height="30dp" />
+    </LinearLayout>
+
+
+</RelativeLayout>
