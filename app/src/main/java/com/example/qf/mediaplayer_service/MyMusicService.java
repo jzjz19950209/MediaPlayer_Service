@@ -46,29 +46,22 @@ public class MyMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         files = new File(path).listFiles();
         for (File f : files) {
             list.add(f.getName());
         }
         initMediaPlayer(currentPosition);
-        Intent fileList=new Intent("updateUI");
-        fileList.putExtra("what","fileList");
-        fileList.putStringArrayListExtra("fileList", (ArrayList<String>) list);
-        sendBroadcast(fileList);
+
     }
 
     private void initMediaPlayer(int position) {
-//        files = new File(path).listFiles();
-//        for (File f : files) {
-//            list.add(f.getName());
-//        }
+        //发送正在播放的文件名
         fileName = list.get(position);
-        Intent intent_name=new Intent("updateUI");
-        intent_name.putExtra("what","change_name");
-        intent_name.putExtra("fileName",fileName);
-        sendBroadcast(intent_name);
-       // sendMsg(fileName);
+//        Intent intent_name=new Intent("updateUI");
+//        intent_name.putExtra("what","change_name");
+//        intent_name.putExtra("fileName",fileName);
+//        sendBroadcast(intent_name);
+        sendFileName(fileName);
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(this, Uri.fromFile(new File(path, fileName)));
@@ -101,13 +94,24 @@ public class MyMusicService extends Service {
 
     }
 
+    public void sendFileName(String fileName){
+        Intent intent_name=new Intent("updateUI");
+        intent_name.putExtra("what","change_name");
+        intent_name.putExtra("fileName",fileName);
+        sendBroadcast(intent_name);
+    }
+    public void sendTime(){
+        Intent intent1 = new Intent("updateUI");
+        intent1.putExtra("what", "seekBar_normal");
+        intent1.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
+        intent1.putExtra("duration", mediaPlayer.getDuration());
+        sendBroadcast(intent1);
+    }
 
     private void sendMsg(String what){
         Intent intent=new Intent("updateUI");
         intent.putExtra("what",what);
         sendBroadcast(intent);
-
-
     }
 
     @Override
@@ -125,6 +129,7 @@ public class MyMusicService extends Service {
                 break;
             case 2:
                 stop();
+                //seekBar归零
                 Intent clear_current=new Intent("updateUI");
                 clear_current.putExtra("what","clear");
                 sendBroadcast(clear_current);
@@ -142,24 +147,33 @@ public class MyMusicService extends Service {
                 break;
             case 6:
                 chooseMusic(intent.getIntExtra("position",0));
+                updateSeekBar_normal();
+                break;
+            case 7:
+                //发送歌曲的文件名列表
+                Intent fileList=new Intent("updateUI");
+                fileList.putExtra("what","fileList");
+                fileList.putStringArrayListExtra("fileList", (ArrayList<String>) list);
+                sendBroadcast(fileList);
+                //initMediaPlayer(currentPosition);
+                sendFileName(list.get(currentPosition));
+
+                sendTime();
+
                 break;
         }
 
         if (mediaPlayer.isPlaying()){
+            //发送播放状态
             sendMsg("play");
         }else {
+            //发送暂停或停止状态
             sendMsg("pause_stop");
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mediaPlayer.reset();
-        mediaPlayer.stop();
-        mediaPlayer.release();
-    }
+
 
 
     public void start() {
@@ -222,11 +236,13 @@ public class MyMusicService extends Service {
             public void run() {
                 if(mediaPlayer.isPlaying()) {
                     while (mediaPlayer.getDuration() != mediaPlayer.getCurrentPosition()) {
-                        Intent intent1 = new Intent("updateUI");
-                        intent1.putExtra("what", "seekBar_normal");
-                        intent1.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
-                        intent1.putExtra("duration", mediaPlayer.getDuration());
-                        sendBroadcast(intent1);
+                        //发送当前播放进度、总播放进度
+//                        Intent intent1 = new Intent("updateUI");
+//                        intent1.putExtra("what", "seekBar_normal");
+//                        intent1.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
+//                        intent1.putExtra("duration", mediaPlayer.getDuration());
+//                        sendBroadcast(intent1);
+                        sendTime();
                         SystemClock.sleep(1000);
                         if (!mediaPlayer.isPlaying()){
                             return;
@@ -248,6 +264,13 @@ public class MyMusicService extends Service {
             stop();
             initMediaPlayer(position);
             start();
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mediaPlayer.reset();
+        mediaPlayer.stop();
+        mediaPlayer.release();
     }
 
 //    public interface UpdateListView{

@@ -1,7 +1,6 @@
 package com.example.qf.mediaplayer_service;
 
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -79,13 +78,13 @@ public class MainActivity extends AppCompatActivity {
                     btn.setBackgroundResource(R.drawable.player_toolbar_play_normal);
                     break;
                 case 4:
-                    if (isPlaying) {
+//                    if (isPlaying) {
                         //mHandler.sendEmptyMessageDelayed(4, 1000);
                         seekBar.setProgress(msg.arg1);
                         seekBar.setMax(msg.arg2);
                         totalTime.setText(sdf.format(new Date(msg.arg2)));
                         currentTime.setText(sdf.format(new Date(msg.arg1)));
-                    }
+
                     break;
                 case 5:
                     seekBar.setProgress(msg.arg1);
@@ -104,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("jzjz", "onCreate: ");
         setContentView(R.layout.activity_main);
         to_service = new Intent(this, MyMusicService.class);
         register();
@@ -121,10 +119,10 @@ public class MainActivity extends AppCompatActivity {
         rotateAnimation.setRepeatCount(RotateAnimation.INFINITE);
         rotateAnimation.setInterpolator(new LinearInterpolator());
 
-        animator= ObjectAnimator.ofFloat(imageView,"rotation",0,359);
-        animator.setDuration(20000);
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.setInterpolator(new LinearInterpolator());
+//        animator= ObjectAnimator.ofFloat(imageView,"rotation",0,359);
+//        animator.setDuration(20000);
+//        animator.setRepeatCount(ValueAnimator.INFINITE);
+//        animator.setInterpolator(new LinearInterpolator());
 
         currentTime = (TextView) findViewById(R.id.currentTime);
         totalTime = (TextView) findViewById(R.id.totalTime);
@@ -173,7 +171,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("jzjz", "onStart: ");
+        //启动服务更新界面
+        to_service.putExtra("type",7);
+        startService(to_service);
         //根据播放状态改变button的背景（点击back退出后回来）
         if (isPlaying) {
             btn.setBackgroundResource(R.drawable.player_toolbar_pause_normal);
@@ -242,7 +242,11 @@ public class MainActivity extends AppCompatActivity {
                     mHandler.sendEmptyMessage(6);
                     break;
                 case "fileList":
+
                     list = intent.getStringArrayListExtra("fileList");
+                    for (String str:list){
+                        Log.d("jzjz", "onReceive: "+str);
+                    }
                     break;
             }
         }
@@ -318,17 +322,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("jzjz", "onStop: ");
-        unregisterReceiver(myReceiver);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("jzjz", "onDestroy: ");
-
+        unregisterReceiver(myReceiver);
     }
 
 }

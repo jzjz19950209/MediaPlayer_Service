@@ -52,7 +52,7 @@ public class MyAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.musicName.setText(list.get(position));
-        holder.image.setImageResource(R.drawable.a58);
+        holder.image.setImageResource(R.drawable.a59);
         return convertView;
     }
     class ViewHolder{
