@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                     name.setText(str);
                     break;
                 case 2:
-                     //animator.start();
+                    //animator.start();
                     imageView.startAnimation(rotateAnimation);
                     btn.setBackgroundResource(R.drawable.player_toolbar_pause_normal);
                     break;
@@ -79,23 +79,20 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 4:
 //                    if (isPlaying) {
-                        //mHandler.sendEmptyMessageDelayed(4, 1000);
-                        seekBar.setProgress(msg.arg1);
-                        seekBar.setMax(msg.arg2);
-                        totalTime.setText(sdf.format(new Date(msg.arg2)));
-                        currentTime.setText(sdf.format(new Date(msg.arg1)));
-
+                    //mHandler.sendEmptyMessageDelayed(4, 1000);
+                    seekBar.setProgress(msg.arg1);
+                    seekBar.setMax(msg.arg2);
+                    totalTime.setText(sdf.format(new Date(msg.arg2)));
+                    currentTime.setText(sdf.format(new Date(msg.arg1)));
                     break;
                 case 5:
                     seekBar.setProgress(msg.arg1);
                     currentTime.setText(sdf.format(new Date(msg.arg1)));
                     break;
-
                 case 6:
                     currentTime.setText(sdf.format(new Date(0)));
                     seekBar.setProgress(0);
                     break;
-
             }
         }
     };
@@ -104,13 +101,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide();
         to_service = new Intent(this, MyMusicService.class);
         register();
 
         btn = (Button) findViewById(R.id.play_pause);
         name = (TextView) findViewById(R.id.name);
         imageView = (ImageView) findViewById(R.id.image);
-        image_music= (ImageView) findViewById(R.id.image_music);
+        image_music = (ImageView) findViewById(R.id.image_music);
         myMusicService = new MyMusicService();
 
 
@@ -130,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         //currentTime.setText(sdf.format(new Date(0)));
         pwView = LayoutInflater.from(this).inflate(R.layout.listview, null);
 
-        pw=new PopupWindow(pwView,LinearLayout.LayoutParams.MATCH_PARENT,
+        pw = new PopupWindow(pwView, LinearLayout.LayoutParams.MATCH_PARENT,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 350, getResources().getDisplayMetrics()));
 
         pw.setOutsideTouchable(true);
@@ -160,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 //                    mediaPlayer.start();
 //                }
                 to_service.putExtra("type", 5);
-                to_service.putExtra("chooseProgress",currentProgress);
+                to_service.putExtra("chooseProgress", currentProgress);
                 startService(to_service);
                 //myMusicService.choosePosition(currentProgress);
             }
@@ -172,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         //启动服务更新界面
-        to_service.putExtra("type",7);
+        to_service.putExtra("type", 7);
         startService(to_service);
         //根据播放状态改变button的背景（点击back退出后回来）
         if (isPlaying) {
@@ -182,16 +180,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    public void initListView(View pwView){
-        ListView listView= (ListView) pwView.findViewById(R.id.lv);
-        MyAdapter adapter=new MyAdapter(MainActivity.this,list);
+
+    public void initListView(View pwView) {
+        ListView listView = (ListView) pwView.findViewById(R.id.lv);
+        MyAdapter adapter = new MyAdapter(MainActivity.this, list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MainActivity.this, list.get(position), Toast.LENGTH_SHORT).show();
-                to_service.putExtra("type",6);
-                to_service.putExtra("position",position);
+                to_service.putExtra("type", 6);
+                to_service.putExtra("position", position);
                 startService(to_service);
 
                 pw.dismiss();
@@ -244,8 +243,8 @@ public class MainActivity extends AppCompatActivity {
                 case "fileList":
 
                     list = intent.getStringArrayListExtra("fileList");
-                    for (String str:list){
-                        Log.d("jzjz", "onReceive: "+str);
+                    for (String str : list) {
+                        Log.d("jzjz", "onReceive: " + str);
                     }
                     break;
             }

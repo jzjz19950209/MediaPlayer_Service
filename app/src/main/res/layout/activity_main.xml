@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@drawable/v6"
+    android:orientation="vertical"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.example.qf.mediaplayer_service.MainActivity">
+
+    <include layout="@layout/mytitle"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@drawable/v6"
+        android:layout_height="match_parent">
     <TextView
         android:layout_width="wrap_content"
         android:layout_marginTop="20dp"
@@ -114,5 +120,5 @@
             android:layout_height="30dp" />
     </LinearLayout>
 
-
-</RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>
