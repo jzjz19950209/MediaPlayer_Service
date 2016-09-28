@@ -5,9 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -36,7 +34,6 @@ import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private MediaPlayer mediaPlayer;
     private SeekBar seekBar;
     public static final String path = Environment.getExternalStorageDirectory().getAbsolutePath()
             + File.separator + "netease" + File.separator +
@@ -44,20 +41,19 @@ public class MainActivity extends AppCompatActivity {
     public File[] files;
     private int currentProgress;
     private SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-    private TextView currentTime, totalTime, name;
+    private TextView currentTime, totalTime, name,now;
     private MyMusicService myMusicService;
-    private ServiceConnection serviceConnection;
     private List<String> list = new ArrayList<>();
     private int currentPosition = 0;
     private Button btn;
     private View pwView;
+    private ObjectAnimator rotation;
     private Intent to_service;
     private ImageView image_music;
     private ImageView imageView;
     public static boolean canPlay = true, isPlaying = false;
     private MyReceiver myReceiver;
     private PopupWindow pw;
-    private ObjectAnimator animator;
     private RotateAnimation rotateAnimation;
     public Handler mHandler = new Handler() {
         @Override
@@ -68,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
                     name.setText(str);
                     break;
                 case 2:
-                    //animator.start();
                     imageView.startAnimation(rotateAnimation);
                     btn.setBackgroundResource(R.drawable.player_toolbar_pause_normal);
                     break;
@@ -77,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
                     btn.setBackgroundResource(R.drawable.player_toolbar_play_normal);
                     break;
                 case 4:
-//                    if (isPlaying) {
-                    //mHandler.sendEmptyMessageDelayed(4, 1000);
                     seekBar.setProgress(msg.arg1);
                     seekBar.setMax(msg.arg2);
                     totalTime.setText(sdf.format(new Date(msg.arg2)));
@@ -108,23 +101,22 @@ public class MainActivity extends AppCompatActivity {
         name = (TextView) findViewById(R.id.name);
         imageView = (ImageView) findViewById(R.id.image);
         image_music = (ImageView) findViewById(R.id.image_music);
+        now= (TextView) findViewById(R.id.now);
         myMusicService = new MyMusicService();
-
 
         rotateAnimation = new RotateAnimation(0, 359, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
         rotateAnimation.setDuration(25000);
         rotateAnimation.setRepeatCount(RotateAnimation.INFINITE);
         rotateAnimation.setInterpolator(new LinearInterpolator());
 
-//        animator= ObjectAnimator.ofFloat(imageView,"rotation",0,359);
-//        animator.setDuration(20000);
-//        animator.setRepeatCount(ValueAnimator.INFINITE);
-//        animator.setInterpolator(new LinearInterpolator());
+//        rotation = ObjectAnimator.ofFloat(imageView,"rotation", 0, 359);
+//        rotation.setDuration(30000);
+//        rotation.setRepeatMode(ValueAnimator.INFINITE);
 
         currentTime = (TextView) findViewById(R.id.currentTime);
         totalTime = (TextView) findViewById(R.id.totalTime);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
-        //currentTime.setText(sdf.format(new Date(0)));
+
         pwView = LayoutInflater.from(this).inflate(R.layout.listview, null);
 
         pw = new PopupWindow(pwView, LinearLayout.LayoutParams.MATCH_PARENT,
@@ -134,11 +126,6 @@ public class MainActivity extends AppCompatActivity {
         pw.setBackgroundDrawable(new BitmapDrawable());
         pw.setFocusable(true);
 
-//        Log.d("jzjz", "onCreate: "+myMusicService.getMediaPlayerDuration());
-//        int duration=myMusicService.getMediaPlayerDuration();
-//        seekBar.setMax(duration);
-//        currentTime.setText(sdf.format(new Date(0)));
-//        totalTime.setText(sdf.format(new Date(duration)));
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -152,14 +139,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-//                mediaPlayer.seekTo(currentProgress);
-//                if(mediaPlayer.isPlaying()){
-//                    mediaPlayer.start();
-//                }
                 to_service.putExtra("type", 5);
                 to_service.putExtra("currentProgress", currentProgress);
                 startService(to_service);
-                //myMusicService.choosePosition(currentProgress);
             }
         });
 
@@ -217,10 +199,12 @@ public class MainActivity extends AppCompatActivity {
                 case "play":
                     mHandler.sendEmptyMessage(2);
                     isPlaying = true;
+                    now.setText("正在播放：");
                     break;
                 case "pause_stop":
                     isPlaying = false;
                     mHandler.sendEmptyMessage(3);
+                    now.setText("当前选择：");
                     break;
                 case "seekBar_normal":
                     Message msg = Message.obtain();
@@ -240,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "fileList":
                     list = intent.getStringArrayListExtra("fileList");
-
                     break;
             }
         }
@@ -252,44 +235,6 @@ public class MainActivity extends AppCompatActivity {
         myReceiver = new MyReceiver();
         registerReceiver(myReceiver, filter);
     }
-//
-//    private void setData(final List<String> list) {
-//        lv.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, list));
-//        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                if (mediaPlayer.isPlaying()) {
-//                    choose(position);
-//                } else {
-//                    mediaPlayer.reset();
-//                    choose(position);
-//                }
-//                currentPosition = position;
-//                btn.setBackgroundResource(R.drawable.player_toolbar_pause_normal);
-//            }
-//        });
-//
-//
-//    }
-//
-//    public void choose(int position) {
-//        fileName = list.get(position);
-//        name.setText(fileName);
-//        if (mediaPlayer.isPlaying()) {
-//            mediaPlayer.reset();
-//        }
-//        seekBar.setProgress(0);
-//        currentPosition = position;
-//        currentTime.setText(sdf.format(new Date(0)));
-//        //initMediaPlayer();
-//        mediaPlayer.start();
-//        int duration = mediaPlayer.getDuration();
-//        seekBar.setMax(duration);
-//        totalTime.setText(sdf.format(new Date(duration)));
-//        mHandler.sendEmptyMessage(4);
-//    }
-
-
     public void last(View view) {
         to_service.putExtra("type", 3);
         startService(to_service);

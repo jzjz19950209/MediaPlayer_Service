@@ -2,16 +2,11 @@ package com.example.qf.mediaplayer_service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +16,6 @@ import java.util.List;
 
 public class MyMusicService extends Service {
     public MediaPlayer mediaPlayer;
-    private SeekBar seekBar;
     public static final String path = Environment.getExternalStorageDirectory().getAbsolutePath()
             + File.separator + "netease" + File.separator +
             "cloudmusic" + File.separator + "Music";
@@ -29,13 +23,8 @@ public class MyMusicService extends Service {
     private int currentProgress;
     private String fileName;
     private SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-    private TextView currentTime, totalTime, name;
-    private MyMusicService myMusicService;
-    private ServiceConnection serviceConnection;
     private List<String> list = new ArrayList<>();
     private int currentPosition =0;
-    private Button btn;
-    private ListView lv;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -57,10 +46,6 @@ public class MyMusicService extends Service {
     private void initMediaPlayer(int position) {
         //发送正在播放的文件名
         fileName = list.get(position);
-//        Intent intent_name=new Intent("updateUI");
-//        intent_name.putExtra("what","change_name");
-//        intent_name.putExtra("fileName",fileName);
-//        sendBroadcast(intent_name);
         sendFileName(fileName);
         currentPosition=position;
         mediaPlayer = new MediaPlayer();
@@ -158,7 +143,7 @@ public class MyMusicService extends Service {
                 fileList.putExtra("what","fileList");
                 fileList.putStringArrayListExtra("fileList", (ArrayList<String>) list);
                 sendBroadcast(fileList);
-                //initMediaPlayer(currentPosition);
+
                 sendFileName(list.get(currentPosition));
 
                 sendTime();
@@ -206,7 +191,6 @@ public class MyMusicService extends Service {
         start();
     }
     public void next(){
-        //initMediaPlayer(currentPosition);
         if(!mediaPlayer.isPlaying()){
 
             mediaPlayer.reset();
@@ -222,7 +206,6 @@ public class MyMusicService extends Service {
         start();
     }
     public void stop() {
-        //initMediaPlayer(currentPosition);
         if (mediaPlayer != null) {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
@@ -240,11 +223,6 @@ public class MyMusicService extends Service {
                 if(mediaPlayer.isPlaying()) {
                     while (mediaPlayer.getDuration() != mediaPlayer.getCurrentPosition()) {
                         //发送当前播放进度、总播放进度
-//                        Intent intent1 = new Intent("updateUI");
-//                        intent1.putExtra("what", "seekBar_normal");
-//                        intent1.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
-//                        intent1.putExtra("duration", mediaPlayer.getDuration());
-//                        sendBroadcast(intent1);
                         sendTime();
                         SystemClock.sleep(1000);
                         if (!mediaPlayer.isPlaying()){
@@ -276,12 +254,4 @@ public class MyMusicService extends Service {
         mediaPlayer.release();
     }
 
-//    public interface UpdateListView{
-//        public void updateListView(List<String> list);
-//    }
-//    private  UpdateListView updateListView;
-//
-//    public void setUpdateListView(UpdateListView updateListView) {
-//        this.updateListView = updateListView;
-//    }
 }
