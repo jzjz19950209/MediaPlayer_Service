@@ -144,7 +144,9 @@ public class MyMusicService extends Service {
                 updateSeekBar_normal();
                 break;
             case 5:
-                chooseProgress(intent.getIntExtra("currentProgress",0));
+                currentProgress=intent.getIntExtra("currentProgress",0);
+                mediaPlayer.seekTo(currentProgress);
+                chooseProgress(currentProgress);
                 break;
             case 6:
                 chooseMusic(intent.getIntExtra("position",0));
@@ -264,7 +266,6 @@ public class MyMusicService extends Service {
     public void chooseMusic(int position){
             stop();
             initMediaPlayer(position);
-
             start();
     }
     @Override

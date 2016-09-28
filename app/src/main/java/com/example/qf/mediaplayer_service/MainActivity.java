@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 //                    mediaPlayer.start();
 //                }
                 to_service.putExtra("type", 5);
-                to_service.putExtra("chooseProgress", currentProgress);
+                to_service.putExtra("currentProgress", currentProgress);
                 startService(to_service);
                 //myMusicService.choosePosition(currentProgress);
             }
@@ -240,11 +240,8 @@ public class MainActivity extends AppCompatActivity {
                     mHandler.sendEmptyMessage(6);
                     break;
                 case "fileList":
-
                     list = intent.getStringArrayListExtra("fileList");
-                    for (String str : list) {
-                        Log.d("jzjz", "onReceive: " + str);
-                    }
+
                     break;
             }
         }
