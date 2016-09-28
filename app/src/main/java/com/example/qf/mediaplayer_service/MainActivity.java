@@ -192,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
                 to_service.putExtra("type", 6);
                 to_service.putExtra("position", position);
                 startService(to_service);
-
                 pw.dismiss();
             }
         });

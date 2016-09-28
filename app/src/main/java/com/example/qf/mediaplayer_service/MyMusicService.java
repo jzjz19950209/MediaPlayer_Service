@@ -62,6 +62,7 @@ public class MyMusicService extends Service {
 //        intent_name.putExtra("fileName",fileName);
 //        sendBroadcast(intent_name);
         sendFileName(fileName);
+        currentPosition=position;
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(this, Uri.fromFile(new File(path, fileName)));
@@ -263,6 +264,7 @@ public class MyMusicService extends Service {
     public void chooseMusic(int position){
             stop();
             initMediaPlayer(position);
+
             start();
     }
     @Override
