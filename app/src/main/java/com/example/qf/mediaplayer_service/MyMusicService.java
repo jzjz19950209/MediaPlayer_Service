@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MyMusicService extends Service {
     public MediaPlayer mediaPlayer;
@@ -22,6 +23,7 @@ public class MyMusicService extends Service {
     public File[] files;
     private int currentProgress;
     private String fileName;
+    private boolean ran=false;
     private SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
     private List<String> list = new ArrayList<>();
     private int currentPosition =0;
@@ -35,6 +37,7 @@ public class MyMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
         files = new File(path).listFiles();
         for (File f : files) {
             list.add(f.getName());
@@ -60,44 +63,18 @@ public class MyMusicService extends Service {
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if(currentPosition==list.size()-1) {
-                    currentPosition=-1;
+                if(ran) {
+                   choose(getRandom());
+                }else {
+                    if (currentPosition == list.size() - 1) {
+                        currentPosition = -1;
+                    }
+                    currentPosition += 1;
+                    choose(currentPosition);
                 }
-                currentPosition += 1;
-                choose(currentPosition);
             }
         });
 
-    }
-    public void choose(int position) {
-        fileName = list.get(position);
-        if (mediaPlayer.isPlaying()){
-            mediaPlayer.reset();
-        }
-        currentPosition = position;
-        initMediaPlayer(currentPosition);
-        start();
-
-    }
-
-    public void sendFileName(String fileName){
-        Intent intent_name=new Intent("updateUI");
-        intent_name.putExtra("what","change_name");
-        intent_name.putExtra("fileName",fileName);
-        sendBroadcast(intent_name);
-    }
-    public void sendTime(){
-        Intent intent1 = new Intent("updateUI");
-        intent1.putExtra("what", "seekBar_normal");
-        intent1.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
-        intent1.putExtra("duration", mediaPlayer.getDuration());
-        sendBroadcast(intent1);
-    }
-
-    private void sendMsg(String what){
-        Intent intent=new Intent("updateUI");
-        intent.putExtra("what",what);
-        sendBroadcast(intent);
     }
 
     @Override
@@ -109,9 +86,11 @@ public class MyMusicService extends Service {
                 }
                 start();
                 updateSeekBar_normal();
+                playStatus();
                 break;
             case 1:
                 pause();
+                playStatus();
                 break;
             case 2:
                 stop();
@@ -119,23 +98,28 @@ public class MyMusicService extends Service {
                 Intent clear_current=new Intent("updateUI");
                 clear_current.putExtra("what","clear");
                 sendBroadcast(clear_current);
+                playStatus();
                 break;
             case 3:
                 last();
                 updateSeekBar_normal();
+                playStatus();
                 break;
             case 4:
                 next();
                 updateSeekBar_normal();
+                playStatus();
                 break;
             case 5:
                 currentProgress=intent.getIntExtra("currentProgress",0);
                 mediaPlayer.seekTo(currentProgress);
                 chooseProgress(currentProgress);
+                playStatus();
                 break;
             case 6:
-                chooseMusic(intent.getIntExtra("position",0));
+                choose(intent.getIntExtra("position",0));
                 updateSeekBar_normal();
+                playStatus();
                 break;
             case 7:
                 //发送歌曲的文件名列表
@@ -144,20 +128,20 @@ public class MyMusicService extends Service {
                 fileList.putStringArrayListExtra("fileList", (ArrayList<String>) list);
                 sendBroadcast(fileList);
 
+                updatePlayMode();
+
                 sendFileName(list.get(currentPosition));
 
                 sendTime();
-
+                playStatus();
+                break;
+            case 8:
+                ran=!ran;
+                updatePlayMode();
                 break;
         }
 
-        if (mediaPlayer.isPlaying()){
-            //发送播放状态
-            sendMsg("play");
-        }else {
-            //发送暂停或停止状态
-            sendMsg("pause_stop");
-        }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -168,7 +152,6 @@ public class MyMusicService extends Service {
         mediaPlayer.start();
         MainActivity.canPlay=false;
     }
-
     public void pause() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
@@ -182,11 +165,16 @@ public class MyMusicService extends Service {
         }else {
             stop();
         }
-        if(currentPosition!=0){
-            currentPosition-=1;
+        if(ran) {
+            currentPosition=getRandom();
         }else {
-            currentPosition=list.size()-1;
+            if (currentPosition != 0) {
+                currentPosition -= 1;
+            } else {
+                currentPosition = list.size() - 1;
+            }
         }
+
         initMediaPlayer(currentPosition);
         start();
     }
@@ -197,10 +185,14 @@ public class MyMusicService extends Service {
         }else {
             stop();
         }
-        if(currentPosition!=list.size()-1) {
-            currentPosition += 1;
+        if(ran){
+           currentPosition=getRandom();
         }else {
-            currentPosition=0;
+            if (currentPosition != list.size() - 1) {
+                currentPosition += 1;
+            } else {
+                currentPosition = 0;
+            }
         }
         initMediaPlayer(currentPosition);
         start();
@@ -216,6 +208,40 @@ public class MyMusicService extends Service {
 
         }
     }
+
+
+    //选择歌曲
+    public void choose(int position) {
+        if (mediaPlayer.isPlaying()){
+            mediaPlayer.reset();
+        }
+        currentPosition = position;
+        initMediaPlayer(currentPosition);
+        start();
+
+    }
+    //发送当前播放的文件名
+    public void sendFileName(String fileName){
+        Intent intent_name=new Intent("updateUI");
+        intent_name.putExtra("what","change_name");
+        intent_name.putExtra("fileName",fileName);
+        sendBroadcast(intent_name);
+    }
+    //发送当前歌曲时间和总时间
+    public void sendTime(){
+        Intent intent1 = new Intent("updateUI");
+        intent1.putExtra("what", "seekBar_normal");
+        intent1.putExtra("currentPosition", mediaPlayer.getCurrentPosition());
+        intent1.putExtra("duration", mediaPlayer.getDuration());
+        sendBroadcast(intent1);
+    }
+
+    private void sendMsg(String what){
+        Intent intent=new Intent("updateUI");
+        intent.putExtra("what",what);
+        sendBroadcast(intent);
+    }
+    //播放状态下自动更新进度条
     public void updateSeekBar_normal(){
         new Thread(new Runnable() {
             @Override
@@ -233,6 +259,7 @@ public class MyMusicService extends Service {
             }
         }).start();
     }
+    //选择进度条位置
     public void chooseProgress(int c){
         //initMediaPlayer(currentPosition);
         Intent intent_c=new Intent("updateUI");
@@ -241,10 +268,33 @@ public class MyMusicService extends Service {
         sendBroadcast(intent_c);
 
     }
-    public void chooseMusic(int position){
-            stop();
-            initMediaPlayer(position);
-            start();
+    //获取随机数
+    public int getRandom(){
+        Random random=new Random();
+        int r=random.nextInt(list.size());
+        return r;
+    }
+    //更新播放模式
+    public void updatePlayMode(){
+        Intent intent_ran=new Intent("updateUI");
+        intent_ran.putExtra("what","playMode");
+        if(ran){
+            intent_ran.putExtra("ran","随机播放");
+        }else {
+            intent_ran.putExtra("ran","循环播放");
+        }
+        sendBroadcast(intent_ran);
+    }
+
+    //播放状态
+    public void playStatus(){
+        if (mediaPlayer.isPlaying()){
+            //发送播放状态
+            sendMsg("play");
+        }else {
+            //发送暂停或停止状态
+            sendMsg("pause_stop");
+        }
     }
     @Override
     public void onDestroy() {

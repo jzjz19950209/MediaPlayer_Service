@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     public File[] files;
     private int currentProgress;
     private SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
-    private TextView currentTime, totalTime, name,now;
+    private TextView currentTime, totalTime, name,now,playMode;
     private MyMusicService myMusicService;
     private List<String> list = new ArrayList<>();
     private int currentPosition = 0;
@@ -64,10 +65,12 @@ public class MainActivity extends AppCompatActivity {
                     name.setText(str);
                     break;
                 case 2:
+                    Log.d("jzjz", "handleMessage: start");
                     imageView.startAnimation(rotateAnimation);
                     btn.setBackgroundResource(R.drawable.player_toolbar_pause_normal);
                     break;
                 case 3:
+                    Log.d("jzjz", "handleMessage: clear");
                     imageView.clearAnimation();
                     btn.setBackgroundResource(R.drawable.player_toolbar_play_normal);
                     break;
@@ -85,6 +88,10 @@ public class MainActivity extends AppCompatActivity {
                     currentTime.setText(sdf.format(new Date(0)));
                     seekBar.setProgress(0);
                     break;
+                case 7:
+                    String result= (String) msg.obj;
+                    playMode.setText(result);
+                    break;
             }
         }
     };
@@ -96,12 +103,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         to_service = new Intent(this, MyMusicService.class);
         register();
-
         btn = (Button) findViewById(R.id.play_pause);
         name = (TextView) findViewById(R.id.name);
         imageView = (ImageView) findViewById(R.id.image);
         image_music = (ImageView) findViewById(R.id.image_music);
         now= (TextView) findViewById(R.id.now);
+        playMode= (TextView) findViewById(R.id.playMode);
         myMusicService = new MyMusicService();
 
         rotateAnimation = new RotateAnimation(0, 359, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
@@ -111,17 +118,15 @@ public class MainActivity extends AppCompatActivity {
 
 //        rotation = ObjectAnimator.ofFloat(imageView,"rotation", 0, 359);
 //        rotation.setDuration(30000);
-//        rotation.setRepeatMode(ValueAnimator.INFINITE);
+//        rotation.setRepeatCount(ValueAnimator.INFINITE);
 
         currentTime = (TextView) findViewById(R.id.currentTime);
         totalTime = (TextView) findViewById(R.id.totalTime);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
 
         pwView = LayoutInflater.from(this).inflate(R.layout.listview, null);
-
         pw = new PopupWindow(pwView, LinearLayout.LayoutParams.MATCH_PARENT,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 350, getResources().getDisplayMetrics()));
-
         pw.setOutsideTouchable(true);
         pw.setBackgroundDrawable(new BitmapDrawable());
         pw.setFocusable(true);
@@ -159,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             btn.setBackgroundResource(R.drawable.player_toolbar_play_normal);
         }
-
     }
 
     public void initListView(View pwView) {
@@ -178,11 +182,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
+    //打开音乐列表
     public void openList(View view) {
         initListView(pwView);
         pw.setAnimationStyle(R.style.pwStyle);
         pw.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+    }
+    //选择播放模式
+    public void playMode(View view) {
+        to_service.putExtra("type",8);
+        startService(to_service);
 
     }
 
@@ -224,6 +233,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "fileList":
                     list = intent.getStringArrayListExtra("fileList");
+                    break;
+                case "playMode":
+                    String str=intent.getStringExtra("ran");
+                    Message msg_ran=Message.obtain();
+                    msg_ran.what=7;
+                    msg_ran.obj=str;
+                    mHandler.sendMessage(msg_ran);
                     break;
             }
         }
